@@ -10,6 +10,9 @@ public class GuardAI : MonoBehaviour
     private List<Transform> _waypoints;
     [SerializeField]
     private int _currentTargetIndex = 0;
+    [SerializeField]
+    private bool _coindTossed = false;
+    private Vector3 _coinDistace;
 
     private bool _reverseWaypoints = false;
     private bool _targetReached = false;
@@ -26,13 +29,15 @@ public class GuardAI : MonoBehaviour
 
     void Update()
     {
-        if (_waypoints.Count > 0 && _waypoints[_currentTargetIndex] != null)
+        if (_waypoints.Count > 0 && _waypoints[_currentTargetIndex] != null && _coindTossed == false)
         {
+
             _guardAgent.SetDestination(_waypoints[_currentTargetIndex].position);
+
 
             float distance = Vector3.Distance(transform.position, _waypoints[_currentTargetIndex].position);
 
-            if(distance < 1 && (_currentTargetIndex == 0 || _currentTargetIndex == _waypoints.Count -1))
+            if (distance < 1 && (_currentTargetIndex == 0 || _currentTargetIndex == _waypoints.Count - 1))
             {
                 _anim.SetBool("Walk", false);
             }
@@ -47,7 +52,15 @@ public class GuardAI : MonoBehaviour
                 StartCoroutine(WaitBeforeMovingRoutine());
             }
         }
+        else
+        {
+            float distance = Vector3.Distance(transform.position, _coinDistace);
 
+            if(distance < 2.5f)
+            {
+                _anim.SetBool("Walk", false);
+            }
+        }
     }
 
     IEnumerator WaitBeforeMovingRoutine()
@@ -90,5 +103,13 @@ public class GuardAI : MonoBehaviour
         }
 
         _targetReached = false;
+    }
+
+    public void HeardCoinTossed(Vector3 coinPos)
+    {
+        _guardAgent.SetDestination(coinPos);
+        _coindTossed = true;
+        _anim.SetBool("Walk", true);
+        _coinDistace = coinPos;
     }
 }
